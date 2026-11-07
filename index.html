@@ -498,14 +498,14 @@ const sprinkle = (() => {
 })();
 /* ---------- Decorations ---------- */
 let decor = [];
-let spawn = { x: 0, y: 0 };
+let spawn = { x: 0, y: 0 }, spawn2 = { x: 0, y: 0 };
 function freeForDecor(x, y, r, minD, top) {
   if (x < 50 || x > W - 50 || y < TOP + top || y > H - 22) return false;
   if (riverDist(x, y) < RIVER_HALF + r + 30) return false;
   if (inLake(x, y, r + 40) || inLake(x, y - 70, 40) || inLake(x, y - 140, 30)) return false;
   if (riverDist(x, y - 60) < RIVER_HALF + 10 && y < riverMid) return false;
   if (pathDist(x, y) < r + 34) return false;
-  if (hyp(x - spawn.x, y - spawn.y) < 110) return false;
+  if (hyp(x - spawn.x, y - spawn.y) < 110 || hyp(x - spawn2.x, y - spawn2.y) < 110) return false;
   for (const d of decor) if (hyp(d.x - x, d.y - y) < minD + (d.big ? 30 : 0)) return false;
   return true;
 }
@@ -549,7 +549,7 @@ function freeSpot(minPlayer) {
   for (let i = 0; i < 200; i++) {
     const x = rnd(50, W - 50), y = rnd(TOP + 100, H - 22);
     if (blocked(x, y, 34) || inLake(x, y - 50, 30)) continue;
-    if (minPlayer && hyp(x - player.x, y - player.y) < minPlayer) continue;
+    if (minPlayer && figs.some(f => hyp(x - f.x, y - f.y) < minPlayer)) continue;
     if (items.some(it => hyp(it.x - x, it.y - y) < 70)) continue;
     return [x, y];
   }
@@ -558,7 +558,15 @@ function freeSpot(minPlayer) {
 let respawnQ = [];
 
 /* ---------- Player & effects ---------- */
-const player = { x: 0, y: 0, dir: 1, moving: false, step: 0 };
+/* one figure per team; "player" is always the figure that is controlled right now */
+const SHIRT = ['#ff7aa8', '#5aa6ff'];
+const figs = [0, 1].map(i => ({ fig: true, team: i, x: 0, y: 0, dir: i ? -1 : 1, moving: false, step: 0 }));
+let player = figs[0];
+function syncPlayer() {
+  player = figs[two() ? turn : 0];
+  figs.forEach(f => { f.moving = false; });
+  keys = {}; moveTarget = null; targetItem = null; nearItem = null; stuck = 0;
+}
 let butterflies = [], particles = [], floaters = [];
 let cam = { x: 0, y: 0 };
 let state = 'setup';
@@ -590,7 +598,10 @@ function buildWorld() {
   PATCHES = []; for (let i = 0; i < Math.max(10, 70 * a); i++) PATCHES.push({ x: rnd(0, W), y: rnd(0, H), r: rnd(110, 280), c: pickM(['#ffd3e4', '#fff1b8', '#d9f7ea', '#e7dcff', '#ffe4cc']) });
   decor = []; items = []; respawnQ = []; particles = []; floaters = [];
   spawn = { x: BRIDGES[0], y: Math.min(H - 30, riverY(BRIDGES[0]) + BH + 40) };
-  player.x = spawn.x; player.y = spawn.y;
+  const b2 = BRIDGES[BRIDGES.length - 1];
+  spawn2 = { x: b2, y: Math.min(H - 30, riverY(b2) + BH + 40) };
+  figs[0].x = spawn.x; figs[0].y = spawn.y; figs[1].x = spawn2.x; figs[1].y = spawn2.y;
+  figs.forEach(f => { f.moving = false; });
   const c = k => Math.max(1, Math.round(k));
   if (Math.max(northLand, southLand) > 220) placeDecor(c(3 * a), () => ({ type: 'house', deco: true, sp: SPR.house, r: 62, big: true }), 62, 200, 165);
   placeDecor(c(16 * a), () => ({ type: 'cupcake', deco: true, sp: pickM(SPR.cupcake), r: 42, big: true }), 42, 140, 150);
@@ -779,7 +790,7 @@ $('btnBulkAdd').addEventListener('click', () => {
   $('team0').value = teams[0].name; $('team1').value = teams[1].name; $('teamNames').hidden = !two();
   refreshSetup();
 })();
-document.querySelectorAll('input[name=teams]').forEach(r => r.addEventListener('change', () => { teamMode = r.value; store.set('teamMode', teamMode); $('teamNames').hidden = !two(); turn = 0; saveTeams(); }));
+document.querySelectorAll('input[name=teams]').forEach(r => r.addEventListener('change', () => { teamMode = r.value; store.set('teamMode', teamMode); $('teamNames').hidden = !two(); turn = 0; saveTeams(); syncPlayer(); }));
 [0, 1].forEach(i => $('team' + i).addEventListener('input', e => { teams[i].name = e.target.value.trim() || (i ? 'Team Blau' : 'Team Pink'); saveTeams(); }));
 $('fach').addEventListener('change', () => {
   const cur = rowsText().trim();
@@ -812,7 +823,7 @@ $('btnStart').addEventListener('click', () => {
     .map(v => { const b = boxes[keyOf(v)] || {}; return { ...v, box: b.box || 1, r: b.r || 0, w: b.w || 0 }; });
   saveRows();
   $('setup').hidden = true; $('hud').hidden = false; $('hint').hidden = isTouch;
-  state = 'play'; updateHud(); document.activeElement && document.activeElement.blur();
+  syncPlayer(); state = 'play'; updateHud(); document.activeElement && document.activeElement.blur();
   toast(two() ? teams[turn].name + ' fängt an!' : vocab.length + ' Vokabeln sind im Schlaraffenland versteckt!');
 });
 $('btnVocab').addEventListener('click', () => { state = 'setup'; $('setup').hidden = false; $('hud').hidden = true; mini.hidden = true; $('hint').hidden = true; keys = {}; });
@@ -883,7 +894,7 @@ function closeCard() {
   else if (result && result.ok && it) collect(it, '+1', '#d63a70');
   else if (it && result && !result.ok) floaters.push({ x: it.x, y: it.y - 60, text: 'Nochmal!', life: 1.4, col: '#c0392b' });
   result = null; state = 'play'; if (document.activeElement) document.activeElement.blur();
-  if (two()) { turn = 1 - turn; saveTeams(); toast(teams[turn].name + ' ist dran!'); }
+  if (two()) { turn = 1 - turn; saveTeams(); syncPlayer(); toast(teams[turn].name + ' ist dran!'); }
   updateHud();
 }
 function collect(it, txt, col) {
@@ -911,7 +922,7 @@ $('btnReset').addEventListener('click', e => {
   const b = e.currentTarget;
   if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Wirklich alles zurücksetzen?'; return; }
   vocab.forEach(v => { v.box = 1; v.r = 0; v.w = 0; }); stats = { score: 0, right: 0, total: 0, streak: 0, best: 0 };
-  teams.forEach(t => { t.score = 0; }); turn = 0; saveTeams();
+  teams.forEach(t => { t.score = 0; }); turn = 0; saveTeams(); syncPlayer();
   saveBoxes(); updateHud(); $('btnProgress').click(); toast('Fortschritt zurückgesetzt.');
 });
 
@@ -993,8 +1004,15 @@ function drawSprite(s, x, y, rot = 0, flip = 1, oy = 0) {
   ctx.save(); ctx.translate(x, y + oy); if (rot) ctx.rotate(rot); if (flip !== 1) ctx.scale(flip, 1); ctx.drawImage(s.c, -s.w / 2, -s.h, s.w, s.h); ctx.restore();
 }
 function shadow(x, y, rx) { ctx.fillStyle = 'rgba(74,35,64,.16)'; ctx.beginPath(); ctx.ellipse(x, y, rx, rx * .28, 0, 0, 7); ctx.fill(); }
-function drawPlayer() {
-  const { x, y, dir, moving, step } = player;
+function drawPlayer(p) {
+  const { x, y, dir, moving, step } = p;
+  const col = TEAMCOL[p.team];
+  // bouncing arrow above the figure that is controlled right now
+  if (two() && p === player && state !== 'setup') {
+    const ay = y - 112 - Math.abs(Math.sin(T * 4)) * 7;
+    ctx.fillStyle = col; ctx.strokeStyle = '#fff'; ctx.lineWidth = 3;
+    ctx.beginPath(); ctx.moveTo(x - 13, ay - 14); ctx.lineTo(x + 13, ay - 14); ctx.lineTo(x, ay + 4); ctx.closePath(); ctx.stroke(); ctx.fill();
+  }
   const bob = moving ? Math.abs(Math.sin(step)) * 3 : Math.sin(T * 2) * .8;
   shadow(x, y, 20);
   ctx.save(); ctx.translate(x, y); ctx.lineCap = 'round';
@@ -1002,7 +1020,7 @@ function drawPlayer() {
   ctx.strokeStyle = '#4a2340'; ctx.lineWidth = 6;
   ctx.beginPath(); ctx.moveTo(-6, -16); ctx.lineTo(-6 + lg, -2); ctx.moveTo(6, -16); ctx.lineTo(6 - lg, -2); ctx.stroke();
   ctx.translate(0, -bob);
-  ctx.fillStyle = '#2bb3a3'; ctx.strokeStyle = '#4a2340'; ctx.lineWidth = 2.5; rrect(ctx, -15, -44, 30, 30, 10); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = SHIRT[p.team]; ctx.strokeStyle = '#4a2340'; ctx.lineWidth = 2.5; rrect(ctx, -15, -44, 30, 30, 10); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#ffd95e'; ctx.beginPath(); ctx.arc(0, -30, 4, 0, 7); ctx.fill();
   // basket
   ctx.save(); ctx.translate(dir * 18, -24);
@@ -1011,7 +1029,7 @@ function drawPlayer() {
   ctx.fillStyle = '#ff8fc4'; ctx.beginPath(); ctx.arc(-3, -5, 4, 0, 7); ctx.fill(); ctx.fillStyle = '#ffd95e'; ctx.beginPath(); ctx.arc(4, -5, 3.5, 0, 7); ctx.fill();
   ctx.restore();
   ctx.fillStyle = '#ffd9b8'; ctx.strokeStyle = '#4a2340'; ctx.lineWidth = 2.5; ctx.beginPath(); ctx.arc(0, -60, 16, 0, 7); ctx.fill(); ctx.stroke();
-  ctx.fillStyle = TEAMCOL[two() ? turn : 0]; ctx.beginPath(); ctx.arc(0, -64, 16.5, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill(); ctx.stroke();
+  ctx.fillStyle = col; ctx.beginPath(); ctx.arc(0, -64, 16.5, Math.PI * 1.02, Math.PI * 1.98); ctx.closePath(); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#fff'; ctx.beginPath(); ctx.arc(0, -82, 5.5, 0, 7); ctx.fill(); ctx.stroke();
   ctx.fillStyle = '#4a2340'; ctx.beginPath(); ctx.arc(dir * 4 - 5, -58, 2.2, 0, 7); ctx.arc(dir * 4 + 5, -58, 2.2, 0, 7); ctx.fill();
   ctx.fillStyle = 'rgba(255,111,165,.55)'; ctx.beginPath(); ctx.arc(dir * 4 - 9, -53, 3, 0, 7); ctx.arc(dir * 4 + 9, -53, 3, 0, 7); ctx.fill();
@@ -1072,14 +1090,13 @@ function render() {
   const list = [];
   for (const d of decor) if (!d.gone && vis(d.x, d.y)) list.push(d);
   for (const it of items) if (vis(it.x, it.y)) list.push(it);
-  if (state !== 'setup') list.push(player);
   list.sort((a, b) => (a.flat ? -1e5 : 0) + a.y - ((b.flat ? -1e5 : 0) + b.y));
 
   // highlight ring under the near item
   if (nearItem && state === 'play') { const r = 30 + (nearItem.r || 0) * .7 + Math.sin(T * 6) * 3; ctx.strokeStyle = 'rgba(255,255,255,.95)'; ctx.lineWidth = 4; ctx.setLineDash([8, 7]); ctx.lineDashOffset = -T * 20; ctx.beginPath(); ctx.ellipse(nearItem.x, nearItem.y, r, r * .4, 0, 0, 7); ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset = 0; }
 
   for (const o of list) {
-    if (o === player) { drawPlayer(); continue; }
+    if (o.fig) { drawPlayer(o); continue; }
     if (o.type) {
       const s = o.sp;
       shadow(o.x, o.y, s.w * .32);
@@ -1092,6 +1109,9 @@ function render() {
       drawSprite(o.sp, o.x, o.y);
     }
   }
+
+  // the figures are always drawn in front so nobody gets lost behind a lollipop
+  if (state !== 'setup') { const fs = two() ? figs.slice().sort((a, b) => a.y - b.y) : [figs[0]]; fs.forEach(drawPlayer); }
 
   // butterflies
   for (const b of butterflies) {
