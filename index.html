@@ -1,11 +1,11 @@
 <!doctype html>
-<html lang="de">
+<html lang="en">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 </head>
 <body>
-<title>Schlaraffenland-Vokabeln</title>
+<title>Candy World Vocab</title>
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -45,7 +45,7 @@ button,input,select,textarea{font:inherit;color:inherit}
 .pill b{font-family:var(--display);font-weight:400;font-size:18px;color:var(--berry);letter-spacing:.5px}
 .pill.team{display:flex;align-items:center;gap:6px;transition:transform .2s}
 .pill.team.on{background:var(--lemon);transform:scale(1.08)}
-.pill.team.on::after{content:"ist dran";font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;background:var(--ink);color:var(--paper);border-radius:99px;padding:1px 7px}
+.pill.team.on::after{content:"your turn";font-size:11px;font-weight:900;text-transform:uppercase;letter-spacing:.06em;background:var(--ink);color:var(--paper);border-radius:99px;padding:1px 7px}
 .sw{display:inline-block;width:12px;height:12px;border-radius:50%;border:2px solid var(--ink)}
 .sw0{background:var(--team0)}.sw1{background:var(--team1)}
 input.tname{border:3px solid var(--ink);border-radius:12px;padding:6px 10px;font-weight:800;width:150px;max-width:100%;background:#fff}
@@ -147,71 +147,71 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 <div id="hud" hidden>
   <div class="stats">
     <div class="pill team" id="team0Pill"><i class="sw sw0"></i><span class="tn">Team Pink</span> <b>0</b></div>
-    <div class="pill team" id="team1Pill"><i class="sw sw1"></i><span class="tn">Team Blau</span> <b>0</b></div>
-    <div class="pill">Sicher <b id="sSafe">0</b>/<span id="sCount">0</span><span class="bar"><i id="sBar"></i></span></div>
+    <div class="pill team" id="team1Pill"><i class="sw sw1"></i><span class="tn">Team Blue</span> <b>0</b></div>
+    <div class="pill">Learned <b id="sSafe">0</b>/<span id="sCount">0</span><span class="bar"><i id="sBar"></i></span></div>
   </div>
   <div class="hudBtns">
-    <button class="btn small" id="btnProgress" type="button">Fortschritt</button>
-    <button class="btn small primary" id="btnVocab" type="button">Vokabeln</button>
+    <button class="btn small" id="btnProgress" type="button">Progress</button>
+    <button class="btn small primary" id="btnVocab" type="button">Words</button>
   </div>
 </div>
 <canvas id="mini" width="340" height="246" hidden aria-hidden="true"></canvas>
-<div id="hint" hidden>Laufen: Pfeiltasten oder WASD · Pflücken: Leertaste</div>
+<div id="hint" hidden>Walk: arrow keys or WASD · Pick: space bar</div>
 <div id="toast" role="status" aria-live="polite"></div>
 
 <!-- Setup -->
 <div id="setup" class="overlay">
   <div class="panel">
-    <h1>Schlaraffenland-Vokabeln</h1>
-    <p class="lead">Trage links das deutsche Wort und rechts die Übersetzung ein. Mit <strong>Enter</strong> springst du ins nächste Feld, unten kommt automatisch eine neue Zeile dazu. Danach sammelst du im Schlaraffenland Süßes, und hinter fast jedem Ding steckt eine Vokabelkarte.</p>
+    <h1>Candy World Vocab</h1>
+    <p class="lead">Type the German word on the left and the translation on the right. Press <strong>Enter</strong> to jump to the next box, and a new row appears at the bottom by itself. Then go hunting in Candy World: only the <strong>lollipops</strong> hide a word card.</p>
 
     <div class="row">
-      <label class="lab" for="fach">Fach</label>
+      <label class="lab" for="fach">Subject</label>
       <select id="fach">
-        <option value="en">Englisch</option>
-        <option value="la">Latein</option>
-        <option value="fr">Französisch</option>
-        <option value="es">Spanisch</option>
-        <option value="xx">Andere Sprache</option>
+        <option value="en">English</option>
+        <option value="la">Latin</option>
+        <option value="fr">French</option>
+        <option value="es">Spanish</option>
+        <option value="xx">Other language</option>
       </select>
     </div>
 
     <div class="vbox">
-      <div class="vhead" aria-hidden="true"><span>Nr.</span><span>Deutsch</span><span id="fxHead">Englisch</span><span></span></div>
+      <div class="vhead" aria-hidden="true"><span>No.</span><span>German</span><span id="fxHead">English</span><span></span></div>
       <div class="vrows" id="vrows"></div>
     </div>
     <div class="status" id="parseStatus" aria-live="polite"></div>
     <div class="row">
-      <button class="btn small mint" id="btnAddRow" type="button">+ Neue Zeile</button>
-      <button class="btn small" id="btnBulk" type="button">Ganze Liste einfügen</button>
-      <button class="btn small" id="btnSample" type="button">Beispielwörter dazu</button>
-      <button class="btn small" id="btnClear" type="button">Alle löschen</button>
+      <button class="btn small mint" id="btnAddRow" type="button">+ New row</button>
+      <button class="btn small" id="btnBulk" type="button">Paste a whole list</button>
+      <button class="btn small" id="btnSample" type="button">Add sample words</button>
+      <button class="btn small" id="btnClear" type="button">Delete all</button>
     </div>
     <div class="bulk" id="bulkBox" hidden>
-      <label class="lab" for="vocab">Ganze Liste einfügen</label>
-      <p class="legend">Eine Vokabel pro Zeile, zum Beispiel <strong>die Biene = bee</strong>. Du kannst auch eine Tabelle aus Word oder Excel hineinkopieren.</p>
+      <label class="lab" for="vocab">Paste a whole list</label>
+      <p class="legend">One word per line, for example <strong>die Biene = bee</strong>. You can also paste a table from Word or Excel.</p>
       <textarea id="vocab" spellcheck="false" placeholder="die Biene = bee&#10;der Zucker = sugar"></textarea>
       <div class="row">
-        <button class="btn small primary" id="btnBulkAdd" type="button">Übernehmen</button>
-        <button class="btn small" id="btnBulkCancel" type="button">Abbrechen</button>
+        <button class="btn small primary" id="btnBulkAdd" type="button">Add to list</button>
+        <button class="btn small" id="btnBulkCancel" type="button">Cancel</button>
       </div>
     </div>
 
     <fieldset class="chips">
-      <legend>Abfrage</legend>
-      <label><input type="radio" name="dir" value="de" id="dirDe" checked><span id="dirDeL">Deutsch → Englisch</span></label>
-      <label><input type="radio" name="dir" value="fx" id="dirFx"><span id="dirFxL">Englisch → Deutsch</span></label>
-      <label><input type="radio" name="dir" value="mix" id="dirMix"><span>Gemischt</span></label>
+      <legend>Quiz</legend>
+      <label><input type="radio" name="dir" value="de" id="dirDe" checked><span id="dirDeL">German → English</span></label>
+      <label><input type="radio" name="dir" value="fx" id="dirFx"><span id="dirFxL">English → German</span></label>
+      <label><input type="radio" name="dir" value="mix" id="dirMix"><span>Mixed</span></label>
     </fieldset>
     <fieldset class="chips">
-      <legend>Karte</legend>
-      <label><input type="radio" name="mode" value="type" id="modeType" checked><span>Antwort eintippen</span></label>
-      <label><input type="radio" name="mode" value="flip" id="modeFlip"><span>Karte umdrehen</span></label>
+      <legend>Card</legend>
+      <label><input type="radio" name="mode" value="type" id="modeType" checked><span>Type the answer</span></label>
+      <label><input type="radio" name="mode" value="flip" id="modeFlip"><span>Flip the card</span></label>
     </fieldset>
     <fieldset class="chips">
-      <legend>Spieler</legend>
-      <label><input type="radio" name="teams" value="2" id="tm2" checked><span>2 Teams</span></label>
-      <label><input type="radio" name="teams" value="1" id="tm1"><span>Allein</span></label>
+      <legend>Players</legend>
+      <label><input type="radio" name="teams" value="2" id="tm2" checked><span>2 teams</span></label>
+      <label><input type="radio" name="teams" value="1" id="tm1"><span>Solo</span></label>
     </fieldset>
     <div class="row" id="teamNames">
       <label class="lab" for="team0">Team 1</label><input id="team0" class="tname" maxlength="20">
@@ -219,14 +219,14 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
     </div>
 
     <div class="how">
-      <div><strong>Laufen</strong>Pfeiltasten oder WASD. Am Handy: dorthin tippen, wo du hinwillst.</div>
-      <div><strong>Pflücken</strong>Neben etwas Süßem die Leertaste drücken oder es antippen.</div>
-      <div><strong>Punkte</strong>Richtige Vokabel: +1. Etwa jedes fünfte Ding ist leer: −1. Danach ist das andere Team dran.</div>
+      <div><strong>Walk</strong>Arrow keys or WASD. On a phone or tablet, tap where you want to go.</div>
+      <div><strong>Pick</strong>Stand next to something sweet and press the space bar, or tap it.</div>
+      <div><strong>Points</strong>Only lollipops hide a word. Right answer: +1. Picking anything else: −1. Then the other team plays.</div>
     </div>
 
     <div class="startRow">
-      <span class="status">Deine Liste wird in diesem Browser gespeichert.</span>
-      <button class="btn primary big" id="btnStart" type="button">Los geht's!</button>
+      <span class="status">Your list is saved in this browser.</span>
+      <button class="btn primary big" id="btnStart" type="button">Let's go!</button>
     </div>
   </div>
 </div>
@@ -243,32 +243,32 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
     </div>
     <div class="word" id="cardWord"></div>
     <form id="answerForm" autocomplete="off">
-      <input id="answer" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Deine Antwort" placeholder="Deine Antwort …">
-      <button class="btn primary" type="submit" id="btnCheck">Prüfen</button>
+      <input id="answer" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" aria-label="Your answer" placeholder="Your answer …">
+      <button class="btn primary" type="submit" id="btnCheck">Check</button>
     </form>
-    <div class="cardBtns" id="flipBox"><button class="btn primary big" id="btnFlip" type="button">Karte umdrehen</button></div>
+    <div class="cardBtns" id="flipBox"><button class="btn primary big" id="btnFlip" type="button">Flip the card</button></div>
     <div class="feedback" id="feedback" hidden></div>
     <div class="cardBtns" id="selfRate" hidden>
-      <button class="btn mint" id="btnKnew" type="button">Gewusst</button>
-      <button class="btn" id="btnNot" type="button">Noch nicht</button>
+      <button class="btn mint" id="btnKnew" type="button">I knew it</button>
+      <button class="btn" id="btnNot" type="button">Not yet</button>
     </div>
-    <div class="cardBtns"><button class="btn primary big" id="btnNext" type="button" hidden>Weiter sammeln</button></div>
-    <button class="skip" id="btnSkip" type="button">Überspringen</button>
+    <div class="cardBtns"><button class="btn primary big" id="btnNext" type="button" hidden>Keep collecting</button></div>
+    <button class="skip" id="btnSkip" type="button">Skip</button>
   </div>
 </div>
 
 <!-- Progress -->
 <div id="progWrap" class="overlay dim" hidden>
   <div class="panel" role="dialog" aria-modal="true" aria-labelledby="progTitle">
-    <h2 id="progTitle">Dein Fortschritt</h2>
-    <p class="legend">Jedes richtige Wort steigt eine Stufe, ein falsches fängt wieder bei Stufe 1 an. Ab Stufe 4 gilt ein Wort als sicher.</p>
+    <h2 id="progTitle">Your progress</h2>
+    <p class="legend">Each right answer moves a word up one level. A wrong answer sends it back to level 1. From level 4 on, a word counts as learned.</p>
     <div class="tableWrap"><table>
-      <thead><tr><th>Deutsch</th><th id="progFx">Englisch</th><th>Stufe</th><th>✓ / ✗</th></tr></thead>
+      <thead><tr><th>German</th><th id="progFx">English</th><th>Level</th><th>✓ / ✗</th></tr></thead>
       <tbody id="progBody"></tbody>
     </table></div>
     <div class="startRow">
-      <button class="btn small" id="btnReset" type="button">Fortschritt zurücksetzen</button>
-      <button class="btn primary" id="btnProgClose" type="button">Weiter spielen</button>
+      <button class="btn small" id="btnReset" type="button">Reset progress</button>
+      <button class="btn primary" id="btnProgClose" type="button">Keep playing</button>
     </div>
   </div>
 </div>
@@ -351,7 +351,7 @@ schön = bonito / bonita
 der Apfel = la manzana`,
   xx: ''
 };
-const LANG = { en: 'Englisch', la: 'Latein', fr: 'Französisch', es: 'Spanisch', xx: 'Fremdsprache' };
+const LANG = { en: 'English', la: 'Latin', fr: 'French', es: 'Spanish', xx: 'Foreign language' };
 
 /* ---------- DOM ---------- */
 const $ = id => document.getElementById(id);
@@ -524,18 +524,18 @@ function blocked(x, y, pad = 14) {
 
 /* ---------- Collectibles ---------- */
 const TYPES = {
-  cotton: { w: 32, found: 'Du hast Zuckerwatte gepflückt!', col: '#ff8fc4' },
-  flower: { w: 36, found: 'Du hast eine Blume gepflückt!', col: '#b58cff' },
-  gummy: { w: 20, found: 'Du hast ein Gummibärchen gefunden!', col: '#ffb000' },
-  snail: { w: 14, found: 'Du hast eine Zuckerschnecke gefangen!', col: '#5ec8f2' },
-  lolli: { w: 0, found: 'Du hast einen Riesenlolli gefunden!' },
-  cane: { w: 0, found: 'Du hast eine Zuckerstange gepflückt!' },
-  house: { w: 0, found: 'Du hast am Lebkuchenhaus geklopft!' },
-  cupcake: { w: 0, found: 'Du hast einen Riesen-Cupcake entdeckt!' },
-  gumdrop: { w: 0, found: 'Du hast einen Gummidrops gefunden!' },
-  donut: { w: 0, found: 'Du hast einen Donut gefunden!' }
+  cotton: { w: 32, found: 'You picked some cotton candy!', col: '#ff8fc4' },
+  flower: { w: 36, found: 'You picked a flower!', col: '#b58cff' },
+  gummy: { w: 20, found: 'You found a gummy bear!', col: '#ffb000' },
+  snail: { w: 14, found: 'You caught a candy snail!', col: '#5ec8f2' },
+  lolli: { w: 0, found: 'You found a giant lollipop!' },
+  cane: { w: 0, found: 'You picked a candy cane!' },
+  house: { w: 0, found: 'You knocked on the gingerbread house!' },
+  cupcake: { w: 0, found: 'You found a giant cupcake!' },
+  gumdrop: { w: 0, found: 'You found a gumdrop!' },
+  donut: { w: 0, found: 'You found a donut!' }
 };
-/* every thing in the world can hold a card (about 80 % do) */
+/* every thing in the world can be picked */
 const active = o => o.deco ? (!o.gone && !(o.coolUntil > T)) : items.includes(o);
 const reach = o => (o.r || 0) + 80;
 const distTo = o => hyp(o.x - player.x, (o.r ? o.y - 8 : o.y) - player.y);
@@ -544,7 +544,9 @@ const typeBag = []; Object.entries(TYPES).forEach(([k, v]) => { for (let i = 0; 
 let items = [];
 const VOC_CHANCE = 0.8;
 const rollVoc = () => Math.random() < VOC_CHANCE;
-function makeItem(type, x, y) { return { type, x, y, voc: rollVoc(), sp: pickM(SPR[type]), ph: Math.random() * 6.28, ang: Math.random() * 6.28, turn: 0, dir: 1 }; }
+/* only lollipops hide a word; everything else is a trap (−1) */
+const hasWord = o => o.type === 'lolli';
+function makeItem(type, x, y) { return { type, x, y, voc: false, sp: pickM(SPR[type]), ph: Math.random() * 6.28, ang: Math.random() * 6.28, turn: 0, dir: 1 }; }
 function freeSpot(minPlayer) {
   for (let i = 0; i < 200; i++) {
     const x = rnd(50, W - 50), y = rnd(TOP + 100, H - 22);
@@ -585,8 +587,8 @@ function buildWorld() {
   const northLand = riverMid - riverAmp - RIVER_HALF - TOP, southLand = H - (riverMid + riverAmp + RIVER_HALF);
   const lrx = Math.min(W * .1, 200);
   LAKES = [
-    { x: W * lx[0], y: TOP + northLand * .5 + 10, rx: lrx, ry: Math.max(40, Math.min(northLand * .28, 105)), c1: '#fff7c2', c2: '#ffe06b', rim: '#fffdf0', name: 'Limonadensee' },
-    { x: W * lx[1], y: H - southLand * .5, rx: lrx * .9, ry: Math.max(36, Math.min(southLand * .28, 95)), c1: '#ffe3f0', c2: '#ffb3d6', rim: '#fff5fa', name: 'Erdbeermilch-Teich' }
+    { x: W * lx[0], y: TOP + northLand * .5 + 10, rx: lrx, ry: Math.max(40, Math.min(northLand * .28, 105)), c1: '#fff7c2', c2: '#ffe06b', rim: '#fffdf0', name: 'Lemonade Lake' },
+    { x: W * lx[1], y: H - southLand * .5, rx: lrx * .9, ry: Math.max(36, Math.min(southLand * .28, 95)), c1: '#ffe3f0', c2: '#ffb3d6', rim: '#fff5fa', name: 'Strawberry Milk Pond' }
   ];
   PATHS = [];
   BRIDGES.forEach((b, i) => {
@@ -605,11 +607,11 @@ function buildWorld() {
   const c = k => Math.max(1, Math.round(k));
   if (Math.max(northLand, southLand) > 220) placeDecor(c(3 * a), () => ({ type: 'house', deco: true, sp: SPR.house, r: 62, big: true }), 62, 200, 165);
   placeDecor(c(16 * a), () => ({ type: 'cupcake', deco: true, sp: pickM(SPR.cupcake), r: 42, big: true }), 42, 140, 150);
-  placeDecor(c(72 * a), () => ({ type: 'lolli', deco: true, sp: pickM(SPR.lolli), r: 14 }), 16, 80, 150);
+  placeDecor(c(105 * a), () => ({ type: 'lolli', deco: true, sp: pickM(SPR.lolli), r: 14 }), 16, 80, 150);
   placeDecor(c(36 * a), () => ({ type: 'cane', deco: true, sp: SPR.cane, r: 10 }), 12, 75, 140);
   placeDecor(c(55 * a), () => ({ type: 'gumdrop', deco: true, sp: pickM(SPR.gumdrop), r: 0 }), 8, 55, 50);
   placeDecor(c(24 * a), () => ({ type: 'donut', deco: true, sp: pickM(SPR.donut), r: 0, flat: true }), 10, 70, 40);
-  decor.forEach(d => { d.voc = rollVoc(); });
+  decor.forEach(d => { d.voc = hasWord(d); });
   const count = Math.max(8, Math.round(95 * a));
   for (let i = 0; i < count; i++) { const s = freeSpot(90); if (s) items.push(makeItem(pickM(typeBag), s[0], s[1])); }
   butterflies = []; for (let i = 0; i < Math.max(4, 16 * a); i++) butterflies.push({ x: rnd(0, W), y: rnd(TOP, H), a: rnd(0, 6.28), c: pickM(['#ff6fa5', '#5ec8f2', '#ffd95e', '#b58cff']), ph: rnd(0, 6) });
@@ -624,12 +626,13 @@ addEventListener('resize', () => { clearTimeout(rebuildTimer); rebuildTimer = se
 let vocab = [], fach = 'en', dirMode = 'de', cardMode = 'type';
 let boxes = store.get('boxes', {});
 let stats = store.get('stats', { score: 0, right: 0, total: 0, streak: 0, best: 0 });
-let teams = store.get('teams', [{ name: 'Team Pink', score: 0 }, { name: 'Team Blau', score: 0 }]);
+let teams = store.get('teams', [{ name: 'Team Pink', score: 0 }, { name: 'Team Blue', score: 0 }]);
+if (teams[1] && teams[1].name === 'Team Blau') teams[1].name = 'Team Blue';
 let turn = store.get('turn', 0), teamMode = store.get('teamMode', '2');
 const TEAMCOL = ['#d63a70', '#2f7fd6'];
 const two = () => teamMode === '2';
-const plusMsg = () => two() ? '+1 Punkt für ' + teams[turn].name + '!' : '+1 Punkt!';
-const minusMsg = () => two() ? teams[turn].name + ' bekommt einen Minuspunkt (−1).' : 'Du bekommst einen Minuspunkt (−1).';
+const plusMsg = () => two() ? '+1 point for ' + teams[turn].name + '!' : '+1 point!';
+const minusMsg = () => two() ? teams[turn].name + ' loses a point (−1).' : 'You lose a point (−1).';
 function saveTeams() { store.set('teams', teams); store.set('turn', turn); }
 const keyOf = v => v.de + '|' + v.fx;
 
@@ -661,9 +664,9 @@ function judge(input, expected) {
   const sa = plain(a).replace(ART, '');
   for (const e of list) {
     const se = plain(e).replace(ART, '');
-    if (sa === se) return { ok: true, exact: false, hint: 'Ganz genau heißt es: ' };
+    if (sa === se) return { ok: true, exact: false, hint: 'Exactly, it is: ' };
     const L = lev(sa, se);
-    if ((L <= 1 && se.length >= 4) || (L <= 2 && se.length >= 9)) return { ok: true, exact: false, hint: 'Kleiner Tippfehler. Richtig geschrieben: ' };
+    if ((L <= 1 && se.length >= 4) || (L <= 2 && se.length >= 9)) return { ok: true, exact: false, hint: 'Small typo. The right spelling is: ' };
   }
   return { ok: false };
 }
@@ -680,7 +683,7 @@ function saveBoxes() { vocab.forEach(v => { boxes[keyOf(v)] = { box: v.box, r: v
 function updateHud() {
   [0, 1].forEach(i => {
     const p = $('team' + i + 'Pill');
-    p.querySelector('.tn').textContent = two() ? teams[i].name : 'Punkte';
+    p.querySelector('.tn').textContent = two() ? teams[i].name : 'Points';
     p.querySelector('b').textContent = teams[i].score;
     p.classList.toggle('on', two() && turn === i);
     p.querySelector('.sw').hidden = !two();
@@ -709,12 +712,12 @@ function renderRows(focus) {
   rows.forEach((r, i) => {
     const last = i === rows.length - 1;
     const row = document.createElement('div'); row.className = 'vrow'; row.dataset.i = i;
-    row.innerHTML = '<span class="n">' + (i + 1) + '</span><input class="de" autocomplete="off" spellcheck="false"><input class="fx" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="del" type="button" title="Zeile löschen">×</button>';
+    row.innerHTML = '<span class="n">' + (i + 1) + '</span><input class="de" autocomplete="off" spellcheck="false"><input class="fx" autocomplete="off" autocapitalize="off" spellcheck="false"><button class="del" type="button" title="Delete row">×</button>';
     const [de, fx] = row.querySelectorAll('input');
     de.value = r.de; fx.value = r.fx;
-    de.setAttribute('aria-label', 'Deutsch, Zeile ' + (i + 1)); fx.setAttribute('aria-label', L + ', Zeile ' + (i + 1));
-    de.placeholder = last ? 'deutsches Wort …' : 'fehlt noch'; fx.placeholder = last ? L + ' …' : 'fehlt noch';
-    row.querySelector('.del').setAttribute('aria-label', 'Zeile ' + (i + 1) + ' löschen');
+    de.setAttribute('aria-label', 'German, row ' + (i + 1)); fx.setAttribute('aria-label', L + ', row ' + (i + 1));
+    de.placeholder = last ? 'German word …' : 'missing'; fx.placeholder = last ? L + ' …' : 'missing';
+    row.querySelector('.del').setAttribute('aria-label', 'Delete row ' + (i + 1));
     vrows.appendChild(row);
   });
   if (focus) {
@@ -729,11 +732,11 @@ function markRows() {
 }
 function refreshSetup() {
   fach = $('fach').value; const L = LANG[fach];
-  $('dirDeL').textContent = 'Deutsch → ' + L; $('dirFxL').textContent = L + ' → Deutsch';
+  $('dirDeL').textContent = 'German → ' + L; $('dirFxL').textContent = L + ' → German';
   $('fxHead').textContent = L;
   const ok = rows.filter(filled).length, half = rows.filter(halfFilled).length, st = $('parseStatus');
-  if (!ok) { st.textContent = 'Noch keine Vokabeln. Trage links Deutsch und rechts ' + L + ' ein.'; st.className = 'status err'; }
-  else { st.textContent = ok + (ok === 1 ? ' Vokabel' : ' Vokabeln') + ' fertig' + (half ? ', ' + half + (half === 1 ? ' Zeile ist' : ' Zeilen sind') + ' noch nicht ganz ausgefüllt (rot markiert).' : '.'); st.className = 'status' + (half ? ' err' : ''); }
+  if (!ok) { st.textContent = 'No words yet. Type German on the left and ' + L + ' on the right.'; st.className = 'status err'; }
+  else { st.textContent = ok + (ok === 1 ? ' word' : ' words') + ' ready' + (half ? '. ' + half + (half === 1 ? ' row is' : ' rows are') + ' not complete yet (marked red).' : '.'); st.className = 'status' + (half ? ' err' : ''); }
   $('btnStart').disabled = !ok;
 }
 function rowsChanged(focus) { renderRows(focus); saveRows(); refreshSetup(); }
@@ -768,17 +771,17 @@ vrows.addEventListener('paste', e => {
   const i = +row.dataset.i, cur = rows[i], empty = !cur.de.trim() && !cur.fx.trim();
   rows.splice(empty ? i : i + 1, empty ? 1 : 0, ...out.map(v => ({ de: v.de, fx: v.fx })));
   rowsChanged([rows.length - 1, '.de']);
-  toast(out.length + (out.length === 1 ? ' Vokabel' : ' Vokabeln') + ' eingefügt');
+  toast(out.length + (out.length === 1 ? ' word' : ' words') + ' added');
 });
 $('btnAddRow').addEventListener('click', () => { ensureEmptyLast(); renderRows([rows.length - 1, '.de']); });
 $('btnBulk').addEventListener('click', () => { $('bulkBox').hidden = false; ta.focus(); });
 $('btnBulkCancel').addEventListener('click', () => { $('bulkBox').hidden = true; ta.value = ''; });
 $('btnBulkAdd').addEventListener('click', () => {
   const { out, bad } = parse(ta.value);
-  if (!out.length) { toast('Keine Vokabeln erkannt. Schreibe: die Biene = bee'); return; }
+  if (!out.length) { toast('No words found. Write: die Biene = bee'); return; }
   rows = rows.filter(r => r.de.trim() || r.fx.trim()).concat(out.map(v => ({ de: v.de, fx: v.fx })));
   ta.value = ''; $('bulkBox').hidden = true; rowsChanged();
-  toast(out.length + ' Vokabeln übernommen' + (bad.length ? ', ' + bad.length + ' Zeilen ohne = übersprungen' : ''));
+  toast(out.length + ' words added' + (bad.length ? ', ' + bad.length + ' lines without = skipped' : ''));
 });
 (function initSetup() {
   fach = store.get('fach', 'en'); $('fach').value = fach;
@@ -791,7 +794,7 @@ $('btnBulkAdd').addEventListener('click', () => {
   refreshSetup();
 })();
 document.querySelectorAll('input[name=teams]').forEach(r => r.addEventListener('change', () => { teamMode = r.value; store.set('teamMode', teamMode); $('teamNames').hidden = !two(); turn = 0; saveTeams(); syncPlayer(); }));
-[0, 1].forEach(i => $('team' + i).addEventListener('input', e => { teams[i].name = e.target.value.trim() || (i ? 'Team Blau' : 'Team Pink'); saveTeams(); }));
+[0, 1].forEach(i => $('team' + i).addEventListener('input', e => { teams[i].name = e.target.value.trim() || (i ? 'Team Blue' : 'Team Pink'); saveTeams(); }));
 $('fach').addEventListener('change', () => {
   const cur = rowsText().trim();
   const isSample = !cur || Object.values(SAMPLES).some(s => s && parse(s).out.map(v => v.de + ' = ' + v.fx).join('\n') === cur);
@@ -800,17 +803,17 @@ $('fach').addEventListener('change', () => {
   store.set('fach', fach); rowsChanged();
 });
 $('btnSample').addEventListener('click', () => {
-  const s = SAMPLES[$('fach').value]; if (!s) { toast('Für diese Sprache gibt es keine Beispielwörter.'); return; }
+  const s = SAMPLES[$('fach').value]; if (!s) { toast('There are no sample words for this language.'); return; }
   const have = new Set(rows.map(r => r.de.trim() + '|' + r.fx.trim()));
   const add = parse(s).out.filter(v => !have.has(v.de + '|' + v.fx));
   rows = rows.filter(r => r.de.trim() || r.fx.trim()).concat(add.map(v => ({ de: v.de, fx: v.fx })));
-  rowsChanged(); toast(add.length + ' Beispielwörter dazu');
+  rowsChanged(); toast(add.length + ' sample words added');
 });
 let clearTimer = 0;
 $('btnClear').addEventListener('click', e => {
   const b = e.currentTarget;
-  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Wirklich alle löschen?'; clearTimeout(clearTimer); clearTimer = setTimeout(() => { b.dataset.armed = ''; b.textContent = 'Alle löschen'; }, 3000); return; }
-  b.dataset.armed = ''; b.textContent = 'Alle löschen';
+  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Really delete all?'; clearTimeout(clearTimer); clearTimer = setTimeout(() => { b.dataset.armed = ''; b.textContent = 'Delete all'; }, 3000); return; }
+  b.dataset.armed = ''; b.textContent = 'Delete all';
   rows = []; rowsChanged([0, '.de']);
 });
 document.querySelectorAll('input[name=dir]').forEach(r => r.addEventListener('change', () => { dirMode = r.value; store.set('dir', dirMode); }));
@@ -824,7 +827,7 @@ $('btnStart').addEventListener('click', () => {
   saveRows();
   $('setup').hidden = true; $('hud').hidden = false; $('hint').hidden = isTouch;
   syncPlayer(); state = 'play'; updateHud(); document.activeElement && document.activeElement.blur();
-  toast(two() ? teams[turn].name + ' fängt an!' : vocab.length + ' Vokabeln sind im Schlaraffenland versteckt!');
+  toast(two() ? teams[turn].name + ' starts!' : vocab.length + ' words are hidden in the lollipops!');
 });
 $('btnVocab').addEventListener('click', () => { state = 'setup'; $('setup').hidden = false; $('hud').hidden = true; mini.hidden = true; $('hint').hidden = true; keys = {}; });
 
@@ -837,7 +840,7 @@ function openCard(it) {
   cardAsk = dirMode === 'mix' ? (Math.random() < .5 ? 'de' : 'fx') : dirMode;
   const L = LANG[fach];
   $('cardFound').textContent = TYPES[it.type].found;
-  $('cardAsk').textContent = cardAsk === 'de' ? (fach === 'xx' ? 'Wie heißt das in der Fremdsprache?' : 'Was heißt das auf ' + L + '?') : 'Was heißt das auf Deutsch?';
+  $('cardAsk').textContent = cardAsk === 'de' ? (fach === 'xx' ? 'How do you say this in the other language?' : 'What is this in ' + L + '?') : 'What is this in German?';
   $('cardWord').textContent = cardAsk === 'de' ? cardWord.de : cardWord.fx;
   const ic = $('cardIcon').getContext('2d'); ic.clearRect(0, 0, 128, 128);
   const s = it.sp, sc = Math.min(110 / s.w, 110 / s.h); ic.drawImage(s.c, 64 - s.w * sc / 2, 64 - s.h * sc / 2, s.w * sc, s.h * sc);
@@ -847,8 +850,8 @@ function openCard(it) {
   $('answerForm').hidden = !typed || empty; $('flipBox').hidden = typed || empty;
   const inp = $('answer'); inp.value = ''; inp.disabled = false; $('btnCheck').disabled = false;
   if (empty) {
-    $('cardAsk').textContent = 'Hier steckt keine Vokabel dahinter.';
-    $('cardWord').textContent = 'Leider leer!';
+    $('cardAsk').textContent = 'Only lollipops hide a word.';
+    $('cardWord').textContent = 'Oops, empty!';
     teams[turn].score -= 1; saveTeams(); updateHud(); result = { empty: true };
     fb.hidden = false; fb.className = 'feedback no'; fb.textContent = minusMsg();
     $('btnSkip').hidden = true; $('btnNext').hidden = false; shownAt = performance.now();
@@ -868,20 +871,20 @@ function score(ok, exact) {
   } else { cardWord.w++; stats.streak = 0; result = { ok: false }; }
   saveBoxes(); saveTeams(); updateHud();
 }
-const PRAISE = ['Zuckersüß, das stimmt!', 'Lecker, richtig!', 'Super gemacht!', 'Genau richtig!', 'Klasse!'];
+const PRAISE = ['Sweet, that is right!', 'Yummy, correct!', 'Well done!', 'Exactly right!', 'Great!'];
 $('answerForm').addEventListener('submit', e => {
   e.preventDefault(); if (result) return;
   const val = $('answer').value; if (!val.trim()) { $('answer').focus(); return; }
   const j = judge(val, solution()); score(j.ok, j.exact);
   const fb = $('feedback'); fb.hidden = false;
-  if (j.ok) { fb.className = 'feedback ok'; fb.innerHTML = (j.exact ? esc(pickM(PRAISE)) : 'Fast perfekt, zählt als richtig!') + ' ' + esc(plusMsg()) +(j.exact ? '' : '<br>' + esc(j.hint) + '<span class="sol">' + esc(solution()) + '</span>'); }
-  else { fb.className = 'feedback no'; fb.innerHTML = 'Leider nicht. Richtig ist:<span class="sol">' + esc(solution()) + '</span>Das Wort kommt bald noch einmal dran.'; const c = $('card'); c.classList.remove('shake'); c.offsetWidth; c.classList.add('shake'); }
+  if (j.ok) { fb.className = 'feedback ok'; fb.innerHTML = (j.exact ? esc(pickM(PRAISE)) : 'Almost perfect, that counts!') + ' ' + esc(plusMsg()) +(j.exact ? '' : '<br>' + esc(j.hint) + '<span class="sol">' + esc(solution()) + '</span>'); }
+  else { fb.className = 'feedback no'; fb.innerHTML = 'Not quite. The answer is:<span class="sol">' + esc(solution()) + '</span>This word will come back soon.'; const c = $('card'); c.classList.remove('shake'); c.offsetWidth; c.classList.add('shake'); }
   $('answer').disabled = true; $('btnCheck').disabled = true; $('btnSkip').hidden = true;
   $('btnNext').hidden = false; shownAt = performance.now(); $('btnNext').focus();
 });
 $('btnFlip').addEventListener('click', () => {
   $('flipBox').hidden = true; const fb = $('feedback'); fb.hidden = false; fb.className = 'feedback';
-  fb.innerHTML = 'Lösung:<span class="sol">' + esc(solution()) + '</span>Hast du es gewusst?';
+  fb.innerHTML = 'Answer:<span class="sol">' + esc(solution()) + '</span>Did you know it?';
   $('selfRate').hidden = false; $('btnKnew').focus();
 });
 $('btnKnew').addEventListener('click', () => { score(true, true); closeCard(); });
@@ -892,15 +895,15 @@ function closeCard() {
   $('cardWrap').hidden = true; const it = cardItem; cardItem = null;
   if (result && result.empty && it) collect(it, '−1', '#c0392b');
   else if (result && result.ok && it) collect(it, '+1', '#d63a70');
-  else if (it && result && !result.ok) floaters.push({ x: it.x, y: it.y - 60, text: 'Nochmal!', life: 1.4, col: '#c0392b' });
+  else if (it && result && !result.ok) floaters.push({ x: it.x, y: it.y - 60, text: 'Try again!', life: 1.4, col: '#c0392b' });
   result = null; state = 'play'; if (document.activeElement) document.activeElement.blur();
-  if (two()) { turn = 1 - turn; saveTeams(); syncPlayer(); toast(teams[turn].name + ' ist dran!'); }
+  if (two()) { turn = 1 - turn; saveTeams(); syncPlayer(); toast("It's " + teams[turn].name + "'s turn!"); }
   updateHud();
 }
 function collect(it, txt, col) {
   if (it.deco) {
-    if (it.type === 'house') { it.coolUntil = T + 45; it.voc = rollVoc(); }
-    else { it.gone = true; it.backAt = T + rnd(25, 45); }
+    if (it.type === 'house') it.coolUntil = T + 45;
+    else { it.gone = true; it.backAt = T + (it.type === 'lolli' ? rnd(12, 20) : rnd(25, 45)); }
   } else { items = items.filter(i => i !== it); respawnQ.push(T + rnd(10, 22)); }
   const cy = it.y - it.sp.h / 2;
   if (txt === '−1') { floaters.push({ x: it.x, y: cy - 20, text: txt, life: 1.3, col }); return; }
@@ -913,17 +916,17 @@ $('btnProgress').addEventListener('click', () => {
   state = 'prog'; keys = {};
   $('progFx').textContent = LANG[fach];
   const rows = vocab.slice().sort((a, b) => a.box - b.box || b.w - a.w);
-  $('progBody').innerHTML = rows.map(v => '<tr><td>' + esc(v.de) + '</td><td>' + esc(v.fx) + '</td><td class="dots" aria-label="Stufe ' + v.box + ' von 5">' + [1, 2, 3, 4, 5].map(n => '<i class="' + (n <= v.box ? 'on' : '') + '"></i>').join('') + '</td><td class="num">' + v.r + ' / ' + v.w + '</td></tr>').join('');
-  const rb = $('btnReset'); rb.textContent = 'Fortschritt zurücksetzen'; rb.dataset.armed = '';
+  $('progBody').innerHTML = rows.map(v => '<tr><td>' + esc(v.de) + '</td><td>' + esc(v.fx) + '</td><td class="dots" aria-label="Level ' + v.box + ' of 5">' + [1, 2, 3, 4, 5].map(n => '<i class="' + (n <= v.box ? 'on' : '') + '"></i>').join('') + '</td><td class="num">' + v.r + ' / ' + v.w + '</td></tr>').join('');
+  const rb = $('btnReset'); rb.textContent = 'Reset progress'; rb.dataset.armed = '';
   $('progWrap').hidden = false; $('btnProgClose').focus();
 });
 $('btnProgClose').addEventListener('click', () => { $('progWrap').hidden = true; state = 'play'; document.activeElement.blur(); });
 $('btnReset').addEventListener('click', e => {
   const b = e.currentTarget;
-  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Wirklich alles zurücksetzen?'; return; }
+  if (!b.dataset.armed) { b.dataset.armed = '1'; b.textContent = 'Really reset everything?'; return; }
   vocab.forEach(v => { v.box = 1; v.r = 0; v.w = 0; }); stats = { score: 0, right: 0, total: 0, streak: 0, best: 0 };
   teams.forEach(t => { t.score = 0; }); turn = 0; saveTeams(); syncPlayer();
-  saveBoxes(); updateHud(); $('btnProgress').click(); toast('Fortschritt zurückgesetzt.');
+  saveBoxes(); updateHud(); $('btnProgress').click(); toast('Progress reset.');
 });
 
 /* ---------- Input ---------- */
@@ -983,7 +986,7 @@ function update(dt) {
     }
     if (targetItem && active(targetItem) && distTo(targetItem) < reach(targetItem) - 15) openCard(targetItem);
   }
-  for (const d of decor) if (d.gone && T >= d.backAt && hyp(d.x - player.x, d.y - player.y) > 120 + (d.r || 0)) { d.gone = false; d.voc = rollVoc(); }
+  for (const d of decor) if (d.gone && T >= d.backAt && hyp(d.x - player.x, d.y - player.y) > 120 + (d.r || 0)) { d.gone = false; d.voc = hasWord(d); }
   for (const it of items) {
     if (it.type !== 'snail' || it === cardItem) continue;
     it.turn -= dt; if (it.turn < 0) { it.ang += rnd(-1.4, 1.4); it.turn = rnd(1.5, 4); }
@@ -1059,7 +1062,7 @@ function render() {
   ctx.strokeStyle = '#8b5433'; ctx.lineWidth = RIVER_HALF * 2; ctx.stroke();
   ctx.strokeStyle = '#a5683f'; ctx.lineWidth = RIVER_HALF; ctx.stroke();
   ctx.setLineDash([50, 90]); ctx.lineDashOffset = -T * 40; ctx.strokeStyle = 'rgba(255,240,220,.28)'; ctx.lineWidth = 8; ctx.stroke(); ctx.setLineDash([]); ctx.lineDashOffset = 0;
-  { const x = (BRIDGES[0] + BRIDGES[1]) / 2; label('Kakaofluss', x, riverY(x) + 10, Math.min(34, RIVER_HALF * .8)); }
+  { const x = (BRIDGES[0] + BRIDGES[1]) / 2; label('Cocoa River', x, riverY(x) + 10, Math.min(34, RIVER_HALF * .8)); }
 
   // lakes
   for (const l of LAKES) {
@@ -1130,7 +1133,7 @@ function render() {
 
   // prompt bubble
   if (nearItem && state === 'play') {
-    const txt = isTouch ? 'Antippen!' : 'Leertaste!';
+    const txt = isTouch ? 'Tap me!' : 'Space bar!';
     const bx = nearItem.x, by = nearItem.y - nearItem.sp.h - 26 - Math.abs(Math.sin(T * 4)) * 5;
     ctx.font = '22px Chewy, "Comic Sans MS", cursive'; const w = ctx.measureText(txt).width + 26;
     ctx.fillStyle = '#fffaf2'; ctx.strokeStyle = '#4a2340'; ctx.lineWidth = 3; rrect(ctx, bx - w / 2, by - 20, w, 34, 17); ctx.fill(); ctx.stroke();
