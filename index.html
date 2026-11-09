@@ -163,7 +163,7 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 <div id="setup" class="overlay">
   <div class="panel">
     <h1>Candy World Vocab</h1>
-    <p class="lead">Type the German word on the left and the translation on the right. Press <strong>Enter</strong> to jump to the next box, and a new row appears at the bottom by itself. Then go hunting in Candy World: only the <strong>lollipops</strong> hide a word card.</p>
+    <p class="lead">Type the German word on the left and the translation on the right. Press <strong>Enter</strong> to jump to the next box, and a new row appears at the bottom by itself. Then go hunting in Candy World: only the <strong>lollipops</strong> can be picked, and most of them hide a word card.</p>
 
     <div class="row">
       <label class="lab" for="fach">Subject</label>
@@ -220,8 +220,8 @@ td.num{font-variant-numeric:tabular-nums;white-space:nowrap}
 
     <div class="how">
       <div><strong>Walk</strong>Arrow keys or WASD. On a phone or tablet, tap where you want to go.</div>
-      <div><strong>Pick</strong>Stand next to something sweet and press the space bar, or tap it.</div>
-      <div><strong>Points</strong>Only lollipops hide a word. Right answer: +1. Picking anything else: −1. Then the other team plays.</div>
+      <div><strong>Pick</strong>Stand next to a lollipop and press the space bar, or tap it.</div>
+      <div><strong>Points</strong>10 lollipops hide a word: right answer +1. 2 lollipops are empty: −1. Then the other team plays.</div>
     </div>
 
     <div class="startRow">
@@ -536,7 +536,9 @@ const TYPES = {
   donut: { w: 0, found: 'You found a donut!' }
 };
 /* every thing in the world can be picked */
-const active = o => o.deco ? (!o.gone && !(o.coolUntil > T)) : items.includes(o);
+/* only lollipops can be picked: 12 of them, 10 hide a word, 2 are empty (−1) */
+const LOLLI_COUNT = 12, EMPTY_LOLLIS = 2;
+const active = o => o.type === 'lolli' && !o.gone;
 const reach = o => (o.r || 0) + 80;
 const distTo = o => hyp(o.x - player.x, (o.r ? o.y - 8 : o.y) - player.y);
 const reachPt = o => ({ x: o.x, y: o.y + (o.r ? o.r + 24 : 10) });
@@ -606,7 +608,7 @@ function buildWorld() {
   figs.forEach(f => { f.moving = false; });
   const c = k => Math.max(1, Math.round(k));
   // lollipops first, spread evenly: one per grid cell, so no clumps and no empty corners
-  const nL = c(105 * a), y0 = TOP + 150, hL = H - 22 - y0;
+  const nL = LOLLI_COUNT, y0 = TOP + 150, hL = H - 22 - y0;
   const cols = Math.max(2, Math.round(Math.sqrt(nL * W / hL))), rowsL = Math.max(2, Math.ceil(nL / cols));
   const cw = W / cols, ch = hL / rowsL;
   for (let gy = 0; gy < rowsL; gy++) for (let gx = 0; gx < cols; gx++) {
@@ -615,12 +617,15 @@ function buildWorld() {
       if (freeForDecor(x, y, 16, 70, 150)) { decor.push({ x, y, type: 'lolli', deco: true, sp: pickM(SPR.lolli), r: 14 }); break; }
     }
   }
+  const missing = nL - decor.filter(d => d.type === 'lolli').length;
+  if (missing > 0) placeDecor(missing, () => ({ type: 'lolli', deco: true, sp: pickM(SPR.lolli), r: 14 }), 16, 55, 140);
   if (Math.max(northLand, southLand) > 220) placeDecor(c(3 * a), () => ({ type: 'house', deco: true, sp: SPR.house, r: 62, big: true }), 62, 200, 165);
   placeDecor(c(16 * a), () => ({ type: 'cupcake', deco: true, sp: pickM(SPR.cupcake), r: 42, big: true }), 42, 140, 150);
   placeDecor(c(36 * a), () => ({ type: 'cane', deco: true, sp: SPR.cane, r: 10 }), 12, 75, 140);
   placeDecor(c(55 * a), () => ({ type: 'gumdrop', deco: true, sp: pickM(SPR.gumdrop), r: 0 }), 8, 55, 50);
   placeDecor(c(24 * a), () => ({ type: 'donut', deco: true, sp: pickM(SPR.donut), r: 0, flat: true }), 10, 70, 40);
-  decor.forEach(d => { d.voc = hasWord(d); });
+  const lol = decor.filter(d => d.type === 'lolli').sort(() => Math.random() - .5);
+  lol.forEach((d, i) => { d.voc = i >= Math.min(EMPTY_LOLLIS, Math.floor(lol.length / 4)); });
   const count = Math.max(8, Math.round(95 * a));
   for (let i = 0; i < count; i++) { const s = freeSpot(90); if (s) items.push(makeItem(pickM(typeBag), s[0], s[1])); }
   butterflies = []; for (let i = 0; i < Math.max(4, 16 * a); i++) butterflies.push({ x: rnd(0, W), y: rnd(TOP, H), a: rnd(0, 6.28), c: pickM(['#ff6fa5', '#5ec8f2', '#ffd95e', '#b58cff']), ph: rnd(0, 6) });
@@ -859,7 +864,7 @@ function openCard(it) {
   $('answerForm').hidden = !typed || empty; $('flipBox').hidden = typed || empty;
   const inp = $('answer'); inp.value = ''; inp.disabled = false; $('btnCheck').disabled = false;
   if (empty) {
-    $('cardAsk').textContent = 'Only lollipops hide a word.';
+    $('cardAsk').textContent = 'There is no word in this lollipop.';
     $('cardWord').textContent = 'Oops, empty!';
     teams[turn].score -= 1; saveTeams(); updateHud(); result = { empty: true };
     fb.hidden = false; fb.className = 'feedback no'; fb.textContent = minusMsg();
@@ -995,7 +1000,12 @@ function update(dt) {
     }
     if (targetItem && active(targetItem) && distTo(targetItem) < reach(targetItem) - 15) openCard(targetItem);
   }
-  for (const d of decor) if (d.gone && T >= d.backAt && hyp(d.x - player.x, d.y - player.y) > 120 + (d.r || 0)) { d.gone = false; d.voc = hasWord(d); }
+  for (const d of decor) if (d.gone && T >= d.backAt && hyp(d.x - player.x, d.y - player.y) > 120 + (d.r || 0)) {
+    d.gone = false;
+    // swap the hidden word/empty with another lollipop now and then, so nobody can learn which ones are empty
+    const o = pickM(decor.filter(e => e.type === 'lolli' && !e.gone && e !== d && e !== cardItem));
+    if (o && Math.random() < .5) { const t = o.voc; o.voc = d.voc; d.voc = t; }
+  }
   for (const it of items) {
     if (it.type !== 'snail' || it === cardItem) continue;
     it.turn -= dt; if (it.turn < 0) { it.ang += rnd(-1.4, 1.4); it.turn = rnd(1.5, 4); }
