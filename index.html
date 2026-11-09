@@ -605,9 +605,18 @@ function buildWorld() {
   figs[0].x = spawn.x; figs[0].y = spawn.y; figs[1].x = spawn2.x; figs[1].y = spawn2.y;
   figs.forEach(f => { f.moving = false; });
   const c = k => Math.max(1, Math.round(k));
+  // lollipops first, spread evenly: one per grid cell, so no clumps and no empty corners
+  const nL = c(105 * a), y0 = TOP + 150, hL = H - 22 - y0;
+  const cols = Math.max(2, Math.round(Math.sqrt(nL * W / hL))), rowsL = Math.max(2, Math.ceil(nL / cols));
+  const cw = W / cols, ch = hL / rowsL;
+  for (let gy = 0; gy < rowsL; gy++) for (let gx = 0; gx < cols; gx++) {
+    for (let t = 0; t < 40; t++) {
+      const x = (gx + .15 + Math.random() * .7) * cw, y = y0 + (gy + .15 + Math.random() * .7) * ch;
+      if (freeForDecor(x, y, 16, 70, 150)) { decor.push({ x, y, type: 'lolli', deco: true, sp: pickM(SPR.lolli), r: 14 }); break; }
+    }
+  }
   if (Math.max(northLand, southLand) > 220) placeDecor(c(3 * a), () => ({ type: 'house', deco: true, sp: SPR.house, r: 62, big: true }), 62, 200, 165);
   placeDecor(c(16 * a), () => ({ type: 'cupcake', deco: true, sp: pickM(SPR.cupcake), r: 42, big: true }), 42, 140, 150);
-  placeDecor(c(105 * a), () => ({ type: 'lolli', deco: true, sp: pickM(SPR.lolli), r: 14 }), 16, 80, 150);
   placeDecor(c(36 * a), () => ({ type: 'cane', deco: true, sp: SPR.cane, r: 10 }), 12, 75, 140);
   placeDecor(c(55 * a), () => ({ type: 'gumdrop', deco: true, sp: pickM(SPR.gumdrop), r: 0 }), 8, 55, 50);
   placeDecor(c(24 * a), () => ({ type: 'donut', deco: true, sp: pickM(SPR.donut), r: 0, flat: true }), 10, 70, 40);
